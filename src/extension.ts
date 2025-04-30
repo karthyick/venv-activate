@@ -144,32 +144,76 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Determine the activation script path based on OS
-        const isWindows = process.platform === 'win32';
-        const activateScriptPath = isWindows 
-            ? path.join(venvPath, 'Scripts', 'activate.bat')
-            : path.join(venvPath, 'bin', 'activate');
+		const isWindows = process.platform === 'win32';
+		const activateScriptPath = isWindows 
+			? path.join(venvPath, 'Scripts', 'activate.bat')  // Include .bat extension explicitly
+			: path.join(venvPath, 'bin', 'activate');
+	
+		let activateExists = false;
+		let retryCount = 0;
+		const maxRetries = 5;
+		
+		while (!activateExists && retryCount < maxRetries) {
+			// Wait longer between retries (3 seconds instead of 2)
+			vscode.window.showInformationMessage(`Waiting for activation script to be available (attempt ${retryCount + 1}/${maxRetries})...`);
+			await new Promise(resolve => setTimeout(resolve, 3000));
+			activateExists = fs.existsSync(activateScriptPath);
+			retryCount++;
+		}
+	
+		if (!activateExists) {
+			vscode.window.showErrorMessage(`Activation script not found at ${activateScriptPath} after ${maxRetries} attempts. The virtual environment may not be properly set up.`);
+			return;
+		}
+	
+		// Get workspace path for cd command
+		const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath || '';
+		
+		// Create a terminal name that clearly shows it's for the venv
+		const venvName = path.basename(venvPath);
+		const terminalName = `Python: ${venvName}`;
+		
+		vscode.window.showInformationMessage(`Terminal Virtual environment trying to set for : ${isWindows ? 'Windows' : 'Unix'}`);
 
-        if (!fs.existsSync(activateScriptPath)) {
-            vscode.window.showErrorMessage(`Activation script not found at ${activateScriptPath}`);
-            return;
-        }
+		// On Windows, we'll create a completely new terminal approach
+		if (isWindows) {
+			try {
+				// Create a new terminal with specific shell args to customize cmd
+				// This is a different approach that directly uses cmd's initialization options
+				const terminal = vscode.window.createTerminal({
+					name: terminalName,
+					shellPath: "cmd.exe",
+					// The /K flag keeps the terminal open after running the command
+					// The PROMPT sets the prompt format - using $E[1;32m for green color to stand out
+					shellArgs: [
+						"/K",
+						`PROMPT=$E[1;32m(${venvName})$E[0m $P$G && cd /D "${workspacePath}" && "${activateScriptPath}" && echo. && echo Virtual environment '${venvName}' activated successfully! && echo. && where python`
+					]
+				});
+				
+				terminal.show();
+				const activateCmd = path.relative(workspaceFolder.uri.fsPath, path.join(venvPath, 'Scripts', 'activate'));
+				terminal.sendText(activateCmd);
+				vscode.window.showInformationMessage(`Terminal Virtual environment activated: ${venvName}`);
 
-        // Get the integrated terminal or create a new one
-        let terminal = vscode.window.activeTerminal;
-        if (!terminal) {
-            terminal = vscode.window.createTerminal('Python Environment');
-        }
-        
-        terminal.show();
-
-        // Execute the appropriate activation command
-        if (isWindows) {
-            terminal.sendText(`"${activateScriptPath}"`);
-        } else {
-            terminal.sendText(`source "${activateScriptPath}"`);
-        }
-
-        vscode.window.showInformationMessage(`Virtual environment activated: ${path.basename(venvPath)}`);
+			} catch (error) {
+				console.error('Error creating terminal:', error);
+				// Fallback to a basic approach
+				const terminal = vscode.window.createTerminal(terminalName);
+				terminal.show();
+				terminal.sendText(`cd /d "${workspacePath}" && "${activateScriptPath}" && echo Virtual environment activated`);
+			}
+		} else {
+			// On Unix, use source to activate
+			const terminal = vscode.window.createTerminal({
+				name: terminalName,
+				shellPath: '/bin/bash',
+				shellArgs: ['-c', `cd "${workspacePath}" && source "${activateScriptPath}" && export PS1="\\e[0;32m(${venvName})\\e[m \\w\\$ " && bash`]
+			});
+			terminal.show();
+		}
+	
+		vscode.window.showInformationMessage(`Virtual environment activated: ${venvName}`);
     });
 
     context.subscriptions.push(disposable);
