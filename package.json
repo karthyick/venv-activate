@@ -1,0 +1,60 @@
+{
+  "name": "venv-activator",
+  "displayName": "Python Venv Activator",
+  "description": "Create and activate Python virtual environments with a simple command",
+  "version": "0.1.0",
+  "publisher": "kr",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karthyick/venv-activator.git"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./extension/out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "venv-activator.activateVenv",
+        "title": "Activate Venv"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "venv-activator.activateVenv",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "node ./esbuild.js",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "compile": "npm run esbuild",
+    "watch": "npm run esbuild-watch",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.60.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.0",
+    "eslint": "^8.35.0",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "glob": "^9.3.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.2",
+    "vscode-test": "^1.6.1",
+    "esbuild": "^0.17.10"
+  }
+}
