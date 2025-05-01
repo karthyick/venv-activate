@@ -16,7 +16,7 @@ A VS Code extension that simplifies Python virtual environment management. With 
 
 ### From VSIX file
 
-1. Download the `.vsix` file from the [latest release](https://github.com/yourusername/venv-activator/releases)
+1. Download the `.vsix` file from the [latest release](https://github.com/yourusername/venv-activate/releases)
 2. In VS Code, go to Extensions view (Ctrl+Shift+X)
 3. Click the "..." (More Actions) button at the top of the Extensions view
 4. Select "Install from VSIX..." and choose the downloaded file
@@ -25,7 +25,7 @@ A VS Code extension that simplifies Python virtual environment management. With 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/venv-activator.git
+git clone https://github.com/yourusername/venv-activate.git
 cd venv-activator
 
 # Install dependencies
@@ -88,7 +88,7 @@ This extension has no configurable settings yet. Future versions may include opt
 
 ## Contributing
 
-Contributions are welcome! Feel free to [open an issue](https://github.com/karthyick/venv-activator/issues) or submit a pull request.
+Contributions are welcome! Feel free to [open an issue](https://github.com/karthyick/venv-activate/issues) or submit a pull request.
 
 ## License
 
