@@ -3,7 +3,7 @@
   "displayName": "Python Venv Activator",
   "description": "Create and activate Python virtual environments with a simple command",
   "version": "0.1.0",
-  "publisher": "kr",
+  "publisher": "krextensions",
   "engines": {
     "vscode": "^1.60.0"
   },
